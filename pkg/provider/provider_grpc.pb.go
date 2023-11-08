@@ -24,7 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProviderServerClient interface {
 	Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error)
-	DeployBlueprint(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error)
+	Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error)
+	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyReply, error)
 }
 
 type providerServerClient struct {
@@ -44,9 +45,18 @@ func (c *providerServerClient) Handshake(ctx context.Context, in *common.Handsha
 	return out, nil
 }
 
-func (c *providerServerClient) DeployBlueprint(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error) {
+func (c *providerServerClient) Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error) {
 	out := new(DeployReply)
-	err := c.cc.Invoke(ctx, "/ProviderServer/DeployBlueprint", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ProviderServer/Deploy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerServerClient) Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyReply, error) {
+	out := new(DestroyReply)
+	err := c.cc.Invoke(ctx, "/ProviderServer/Destroy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +68,8 @@ func (c *providerServerClient) DeployBlueprint(ctx context.Context, in *DeployRe
 // for forward compatibility
 type ProviderServerServer interface {
 	Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error)
-	DeployBlueprint(context.Context, *DeployRequest) (*DeployReply, error)
+	Deploy(context.Context, *DeployRequest) (*DeployReply, error)
+	Destroy(context.Context, *DestroyRequest) (*DestroyReply, error)
 	mustEmbedUnimplementedProviderServerServer()
 }
 
@@ -69,8 +80,11 @@ type UnimplementedProviderServerServer struct {
 func (UnimplementedProviderServerServer) Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Handshake not implemented")
 }
-func (UnimplementedProviderServerServer) DeployBlueprint(context.Context, *DeployRequest) (*DeployReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeployBlueprint not implemented")
+func (UnimplementedProviderServerServer) Deploy(context.Context, *DeployRequest) (*DeployReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deploy not implemented")
+}
+func (UnimplementedProviderServerServer) Destroy(context.Context, *DestroyRequest) (*DestroyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Destroy not implemented")
 }
 func (UnimplementedProviderServerServer) mustEmbedUnimplementedProviderServerServer() {}
 
@@ -103,20 +117,38 @@ func _ProviderServer_Handshake_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProviderServer_DeployBlueprint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProviderServer_Deploy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeployRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProviderServerServer).DeployBlueprint(ctx, in)
+		return srv.(ProviderServerServer).Deploy(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ProviderServer/DeployBlueprint",
+		FullMethod: "/ProviderServer/Deploy",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServerServer).DeployBlueprint(ctx, req.(*DeployRequest))
+		return srv.(ProviderServerServer).Deploy(ctx, req.(*DeployRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProviderServer_Destroy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DestroyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServerServer).Destroy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProviderServer/Destroy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServerServer).Destroy(ctx, req.(*DestroyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -133,8 +165,12 @@ var ProviderServer_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProviderServer_Handshake_Handler,
 		},
 		{
-			MethodName: "DeployBlueprint",
-			Handler:    _ProviderServer_DeployBlueprint_Handler,
+			MethodName: "Deploy",
+			Handler:    _ProviderServer_Deploy_Handler,
+		},
+		{
+			MethodName: "Destroy",
+			Handler:    _ProviderServer_Destroy_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

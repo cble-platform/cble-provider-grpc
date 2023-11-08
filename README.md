@@ -58,8 +58,20 @@ func main() {
     Port:     int(registerReply.Port),
   }
 
-  // Serve the provider gRPC server (blocking call)
-  if err := providerGRPC.Serve(providerOpts); err != nil {
+  // Provider-specific functions to run for each command
+  funcMap := &providerGRPC.ProviderServerFuncMap{
+    Deploy: func(request *providerGRPC.DeployRequest) (*providerGRPC.DeployReply, error) {
+      // Do something with the deployment request
+      return nil, nil
+    },
+    Destroy: func(request *providerGRPC.DestroyRequest) (*providerGRPC.DestroyReply, error) {
+      // Do something with the destroy request
+      return nil, nil
+    },
+  }
+
+    // Serve the provider gRPC server (blocking call)
+  if err := providerGRPC.Serve(providerOpts, funcMap); err != nil {
     logrus.Fatalf("failed to server provider gRPC server: %v", err)
   }
 

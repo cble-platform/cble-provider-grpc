@@ -18,6 +18,12 @@ import (
 
 type providerServer struct {
 	UnimplementedProviderServerServer
+	FuncMap *ProviderServerFuncMap
+}
+
+type ProviderServerFuncMap struct {
+	Deploy  func(request *DeployRequest) (*DeployReply, error)
+	Destroy func(request *DestroyRequest) (*DestroyReply, error)
 }
 
 type ProviderServerOptions struct {
@@ -28,7 +34,13 @@ type ProviderServerOptions struct {
 }
 
 // Serve is a blocking call which returns an error if unable to serve
-func Serve(options *ProviderServerOptions) error {
+func Serve(options *ProviderServerOptions, funcMap *ProviderServerFuncMap) error {
+	if options == nil {
+		return fmt.Errorf("options must not be nil")
+	}
+	if funcMap == nil {
+		return fmt.Errorf("options must not be nil")
+	}
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", options.Port))
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
@@ -45,7 +57,9 @@ func Serve(options *ProviderServerOptions) error {
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	grpcServer := grpc.NewServer(opts...)
-	RegisterProviderServerServer(grpcServer, &providerServer{})
+	RegisterProviderServerServer(grpcServer, &providerServer{
+		FuncMap: funcMap,
+	})
 
 	// Setup graceful shutdown signals
 	sigCh := make(chan os.Signal, 1)
@@ -76,9 +90,12 @@ func (s *providerServer) Handshake(ctx context.Context, request *common.Handshak
 	}, nil
 }
 
-func (s *providerServer) DeployBlueprint(ctx context.Context, request *DeployRequest) (*DeployReply, error) {
-	logrus.Debugf("DeployBlueprint request for deployment %s", request.DeploymentId)
-	templateVars := request.TemplateVars.AsMap()
-	logrus.WithFields(templateVars).Debug("template vars:")
-	return nil, nil
+func (s *providerServer) Deploy(ctx context.Context, request *DeployRequest) (*DeployReply, error) {
+	logrus.Debugf("Deploy request for deployment %s", request.DeploymentId)
+	return s.FuncMap.Deploy(request)
+}
+
+func (s *providerServer) Destroy(ctx context.Context, request *DestroyRequest) (*DestroyReply, error) {
+	logrus.Debugf("Destroy request for deployment %s", request.DeploymentId)
+	return s.FuncMap.Destroy(request)
 }

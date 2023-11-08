@@ -7,7 +7,8 @@ import "common.proto";
 // gRPC Service
 service ProviderServer {
   rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
-  rpc DeployBlueprint(DeployRequest) returns (DeployReply) {}
+  rpc Deploy(DeployRequest) returns (DeployReply) {}
+  rpc Destroy(DestroyRequest) returns (DestroyReply) {}
 }
 
 // Deploy
@@ -16,8 +17,26 @@ message DeployRequest {
   bytes blueprint = 2;
   google.protobuf.Struct templateVars = 3;
 }
+
 message DeployReply {
-  RPCStatus status = 1;
-  google.protobuf.Struct deployment_state = 2;
-  google.protobuf.Struct deployment_vars = 3;
+  string deployment_id = 1;
+  RPCStatus status = 2;
+  google.protobuf.Struct deployment_state = 3;
+  google.protobuf.Struct deployment_vars = 4;
+}
+
+// Destroy
+message DestroyRequest {
+  string deployment_id = 1;
+  bytes blueprint = 2;
+  google.protobuf.Struct templateVars = 3;
+  google.protobuf.Struct deployment_state = 4;
+  google.protobuf.Struct deployment_vars = 5;
+}
+
+message DestroyReply {
+  string deployment_id = 1;
+  RPCStatus status = 2;
+  google.protobuf.Struct deployment_state = 3;
+  google.protobuf.Struct deployment_vars = 4;
 }
