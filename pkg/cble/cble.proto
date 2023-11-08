@@ -4,7 +4,7 @@ option go_package = "github.com/cble-platform/cble-provider-grpc/pkg/cble";
 import "common.proto";
 
 // gRPC Service
-service CBLEServer {
+service CBLE {
   //  (DO NOT MODIFY)
   rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
   rpc RegisterProvider(RegistrationRequest) returns (RegistrationReply) {}

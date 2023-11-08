@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProviderClient interface {
 	Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error)
+	Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*common.RPCStatusReply, error)
 	Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error)
 	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyReply, error)
 }
@@ -39,6 +40,15 @@ func NewProviderClient(cc grpc.ClientConnInterface) ProviderClient {
 func (c *providerClient) Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error) {
 	out := new(common.HandshakeReply)
 	err := c.cc.Invoke(ctx, "/Provider/Handshake", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*common.RPCStatusReply, error) {
+	out := new(common.RPCStatusReply)
+	err := c.cc.Invoke(ctx, "/Provider/Configure", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +78,7 @@ func (c *providerClient) Destroy(ctx context.Context, in *DestroyRequest, opts .
 // for forward compatibility
 type ProviderServer interface {
 	Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error)
+	Configure(context.Context, *ConfigureRequest) (*common.RPCStatusReply, error)
 	Deploy(context.Context, *DeployRequest) (*DeployReply, error)
 	Destroy(context.Context, *DestroyRequest) (*DestroyReply, error)
 	mustEmbedUnimplementedProviderServer()
@@ -79,6 +90,9 @@ type UnimplementedProviderServer struct {
 
 func (UnimplementedProviderServer) Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Handshake not implemented")
+}
+func (UnimplementedProviderServer) Configure(context.Context, *ConfigureRequest) (*common.RPCStatusReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Configure not implemented")
 }
 func (UnimplementedProviderServer) Deploy(context.Context, *DeployRequest) (*DeployReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deploy not implemented")
@@ -113,6 +127,24 @@ func _Provider_Handshake_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProviderServer).Handshake(ctx, req.(*common.HandshakeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_Configure_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).Configure(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Provider/Configure",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).Configure(ctx, req.(*ConfigureRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -163,6 +195,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Handshake",
 			Handler:    _Provider_Handshake_Handler,
+		},
+		{
+			MethodName: "Configure",
+			Handler:    _Provider_Configure_Handler,
 		},
 		{
 			MethodName: "Deploy",

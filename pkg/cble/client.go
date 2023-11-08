@@ -51,8 +51,8 @@ func Connect(options *CBLEClientOptions) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (CBLEServerClient, error) {
-	client := NewCBLEServerClient(conn)
+func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (CBLEClient, error) {
+	client := NewCBLEClient(conn)
 	reply, err := client.Handshake(ctx, &common.HandshakeRequest{
 		ClientVersion: VERSION,
 	})

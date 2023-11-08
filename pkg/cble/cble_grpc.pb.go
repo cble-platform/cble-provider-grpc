@@ -19,160 +19,160 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// CBLEServerClient is the client API for CBLEServer service.
+// CBLEClient is the client API for CBLE service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CBLEServerClient interface {
+type CBLEClient interface {
 	// (DO NOT MODIFY)
 	Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error)
 	RegisterProvider(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationReply, error)
 	UnregisterProvider(ctx context.Context, in *UnregistrationRequest, opts ...grpc.CallOption) (*UnregistrationReply, error)
 }
 
-type cBLEServerClient struct {
+type cBLEClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCBLEServerClient(cc grpc.ClientConnInterface) CBLEServerClient {
-	return &cBLEServerClient{cc}
+func NewCBLEClient(cc grpc.ClientConnInterface) CBLEClient {
+	return &cBLEClient{cc}
 }
 
-func (c *cBLEServerClient) Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error) {
+func (c *cBLEClient) Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error) {
 	out := new(common.HandshakeReply)
-	err := c.cc.Invoke(ctx, "/CBLEServer/Handshake", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/CBLE/Handshake", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *cBLEServerClient) RegisterProvider(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationReply, error) {
+func (c *cBLEClient) RegisterProvider(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationReply, error) {
 	out := new(RegistrationReply)
-	err := c.cc.Invoke(ctx, "/CBLEServer/RegisterProvider", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/CBLE/RegisterProvider", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *cBLEServerClient) UnregisterProvider(ctx context.Context, in *UnregistrationRequest, opts ...grpc.CallOption) (*UnregistrationReply, error) {
+func (c *cBLEClient) UnregisterProvider(ctx context.Context, in *UnregistrationRequest, opts ...grpc.CallOption) (*UnregistrationReply, error) {
 	out := new(UnregistrationReply)
-	err := c.cc.Invoke(ctx, "/CBLEServer/UnregisterProvider", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/CBLE/UnregisterProvider", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CBLEServerServer is the server API for CBLEServer service.
-// All implementations must embed UnimplementedCBLEServerServer
+// CBLEServer is the server API for CBLE service.
+// All implementations must embed UnimplementedCBLEServer
 // for forward compatibility
-type CBLEServerServer interface {
+type CBLEServer interface {
 	// (DO NOT MODIFY)
 	Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error)
 	RegisterProvider(context.Context, *RegistrationRequest) (*RegistrationReply, error)
 	UnregisterProvider(context.Context, *UnregistrationRequest) (*UnregistrationReply, error)
-	mustEmbedUnimplementedCBLEServerServer()
+	mustEmbedUnimplementedCBLEServer()
 }
 
-// UnimplementedCBLEServerServer must be embedded to have forward compatible implementations.
-type UnimplementedCBLEServerServer struct {
+// UnimplementedCBLEServer must be embedded to have forward compatible implementations.
+type UnimplementedCBLEServer struct {
 }
 
-func (UnimplementedCBLEServerServer) Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error) {
+func (UnimplementedCBLEServer) Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Handshake not implemented")
 }
-func (UnimplementedCBLEServerServer) RegisterProvider(context.Context, *RegistrationRequest) (*RegistrationReply, error) {
+func (UnimplementedCBLEServer) RegisterProvider(context.Context, *RegistrationRequest) (*RegistrationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterProvider not implemented")
 }
-func (UnimplementedCBLEServerServer) UnregisterProvider(context.Context, *UnregistrationRequest) (*UnregistrationReply, error) {
+func (UnimplementedCBLEServer) UnregisterProvider(context.Context, *UnregistrationRequest) (*UnregistrationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnregisterProvider not implemented")
 }
-func (UnimplementedCBLEServerServer) mustEmbedUnimplementedCBLEServerServer() {}
+func (UnimplementedCBLEServer) mustEmbedUnimplementedCBLEServer() {}
 
-// UnsafeCBLEServerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CBLEServerServer will
+// UnsafeCBLEServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CBLEServer will
 // result in compilation errors.
-type UnsafeCBLEServerServer interface {
-	mustEmbedUnimplementedCBLEServerServer()
+type UnsafeCBLEServer interface {
+	mustEmbedUnimplementedCBLEServer()
 }
 
-func RegisterCBLEServerServer(s grpc.ServiceRegistrar, srv CBLEServerServer) {
-	s.RegisterService(&CBLEServer_ServiceDesc, srv)
+func RegisterCBLEServer(s grpc.ServiceRegistrar, srv CBLEServer) {
+	s.RegisterService(&CBLE_ServiceDesc, srv)
 }
 
-func _CBLEServer_Handshake_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CBLE_Handshake_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(common.HandshakeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CBLEServerServer).Handshake(ctx, in)
+		return srv.(CBLEServer).Handshake(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/CBLEServer/Handshake",
+		FullMethod: "/CBLE/Handshake",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CBLEServerServer).Handshake(ctx, req.(*common.HandshakeRequest))
+		return srv.(CBLEServer).Handshake(ctx, req.(*common.HandshakeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CBLEServer_RegisterProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CBLE_RegisterProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegistrationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CBLEServerServer).RegisterProvider(ctx, in)
+		return srv.(CBLEServer).RegisterProvider(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/CBLEServer/RegisterProvider",
+		FullMethod: "/CBLE/RegisterProvider",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CBLEServerServer).RegisterProvider(ctx, req.(*RegistrationRequest))
+		return srv.(CBLEServer).RegisterProvider(ctx, req.(*RegistrationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CBLEServer_UnregisterProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CBLE_UnregisterProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UnregistrationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CBLEServerServer).UnregisterProvider(ctx, in)
+		return srv.(CBLEServer).UnregisterProvider(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/CBLEServer/UnregisterProvider",
+		FullMethod: "/CBLE/UnregisterProvider",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CBLEServerServer).UnregisterProvider(ctx, req.(*UnregistrationRequest))
+		return srv.(CBLEServer).UnregisterProvider(ctx, req.(*UnregistrationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// CBLEServer_ServiceDesc is the grpc.ServiceDesc for CBLEServer service.
+// CBLE_ServiceDesc is the grpc.ServiceDesc for CBLE service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var CBLEServer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "CBLEServer",
-	HandlerType: (*CBLEServerServer)(nil),
+var CBLE_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "CBLE",
+	HandlerType: (*CBLEServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Handshake",
-			Handler:    _CBLEServer_Handshake_Handler,
+			Handler:    _CBLE_Handshake_Handler,
 		},
 		{
 			MethodName: "RegisterProvider",
-			Handler:    _CBLEServer_RegisterProvider_Handler,
+			Handler:    _CBLE_RegisterProvider_Handler,
 		},
 		{
 			MethodName: "UnregisterProvider",
-			Handler:    _CBLEServer_UnregisterProvider_Handler,
+			Handler:    _CBLE_UnregisterProvider_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

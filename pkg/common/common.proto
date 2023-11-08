@@ -6,6 +6,8 @@ enum RPCStatus {
   FAILURE = 1;
 }
 
+message RPCStatusReply { RPCStatus status = 1; }
+
 // Handshake (DO NOT MODIFY)
 message HandshakeRequest { string client_version = 1; }
 message HandshakeReply { string server_version = 1; }

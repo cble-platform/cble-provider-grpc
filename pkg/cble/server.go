@@ -17,14 +17,14 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type cbleserverServer struct {
-	UnimplementedCBLEServerServer
+type DefaultCBLEServer struct {
+	UnimplementedCBLEServer
 
 	// Maps provider name@version to port it's running on
-	RegisteredProviders map[string]registeredProvider
+	RegisteredProviders map[string]RegisteredProvider
 }
 
-type registeredProvider struct {
+type RegisteredProvider struct {
 	ID       string
 	Port     int32
 	Features map[string]bool
@@ -44,12 +44,12 @@ var defaultServerOptions = &CBLEServerOptions{
 	Port:     50051,
 }
 
-func DefaultServe() error {
-	return Serve(defaultServerOptions)
+func DefaultServe(server CBLEServer) error {
+	return Serve(server, defaultServerOptions)
 }
 
 // Serve is a blocking call which returns an error if unable to serve
-func Serve(options *CBLEServerOptions) error {
+func Serve(server CBLEServer, options *CBLEServerOptions) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", options.Port))
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
@@ -66,9 +66,7 @@ func Serve(options *CBLEServerOptions) error {
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	grpcServer := grpc.NewServer(opts...)
-	RegisterCBLEServerServer(grpcServer, &cbleserverServer{
-		RegisteredProviders: make(map[string]registeredProvider),
-	})
+	RegisterCBLEServer(grpcServer, server)
 
 	// Setup graceful shutdown signals
 	sigCh := make(chan os.Signal, 1)
@@ -89,7 +87,7 @@ func Serve(options *CBLEServerOptions) error {
 	return nil
 }
 
-func (s *cbleserverServer) Handshake(ctx context.Context, request *common.HandshakeRequest) (*common.HandshakeReply, error) {
+func (s DefaultCBLEServer) Handshake(ctx context.Context, request *common.HandshakeRequest) (*common.HandshakeReply, error) {
 	if semver.Major(request.ClientVersion) != semver.Major(VERSION) {
 		return nil, fmt.Errorf("major version mismatch: server version is %s and client version is %s", VERSION, request.ClientVersion)
 	}
@@ -99,7 +97,7 @@ func (s *cbleserverServer) Handshake(ctx context.Context, request *common.Handsh
 	}, nil
 }
 
-func (s *cbleserverServer) RegisterProvider(ctx context.Context, request *RegistrationRequest) (*RegistrationReply, error) {
+func (s DefaultCBLEServer) RegisterProvider(ctx context.Context, request *RegistrationRequest) (*RegistrationReply, error) {
 	logrus.Debugf("Registration request from %s@%s (%s)", request.Name, request.Version, request.Id)
 	providerKey := fmt.Sprintf("%s@%s", request.Name, request.Version)
 	// Check if a provider with this version is already registered
@@ -135,7 +133,7 @@ func (s *cbleserverServer) RegisterProvider(ctx context.Context, request *Regist
 		return nil, fmt.Errorf("failed to find open port for provider gRPC server")
 	}
 	// Map the port
-	s.RegisteredProviders[providerKey] = registeredProvider{
+	s.RegisteredProviders[providerKey] = RegisteredProvider{
 		ID:       request.Id,
 		Port:     port,
 		Features: request.Features,
@@ -147,7 +145,7 @@ func (s *cbleserverServer) RegisterProvider(ctx context.Context, request *Regist
 	}, nil
 }
 
-func (s *cbleserverServer) UnregisterProvider(ctx context.Context, request *UnregistrationRequest) (*UnregistrationReply, error) {
+func (s DefaultCBLEServer) UnregisterProvider(ctx context.Context, request *UnregistrationRequest) (*UnregistrationReply, error) {
 	logrus.Debugf("Unregistration request from %s@%s (%s)", request.Name, request.Version, request.Id)
 	providerKey := fmt.Sprintf("%s@%s", request.Name, request.Version)
 	// Check to make sure this provider is registered

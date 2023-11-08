@@ -7,15 +7,21 @@ import "common.proto";
 // gRPC Service
 service Provider {
   rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+  rpc Configure(ConfigureRequest) returns (RPCStatusReply) {}
   rpc Deploy(DeployRequest) returns (DeployReply) {}
   rpc Destroy(DestroyRequest) returns (DestroyReply) {}
 }
+
+// Configure
+message ConfigureRequest { bytes config = 1; }
 
 // Deploy
 message DeployRequest {
   string deployment_id = 1;
   bytes blueprint = 2;
   google.protobuf.Struct templateVars = 3;
+  google.protobuf.Struct deployment_state = 4;
+  google.protobuf.Struct deployment_vars = 5;
 }
 
 message DeployReply {
@@ -23,6 +29,7 @@ message DeployReply {
   RPCStatus status = 2;
   google.protobuf.Struct deployment_state = 3;
   google.protobuf.Struct deployment_vars = 4;
+  repeated string errors = 5;
 }
 
 // Destroy
@@ -39,4 +46,5 @@ message DestroyReply {
   RPCStatus status = 2;
   google.protobuf.Struct deployment_state = 3;
   google.protobuf.Struct deployment_vars = 4;
+  repeated string errors = 5;
 }
