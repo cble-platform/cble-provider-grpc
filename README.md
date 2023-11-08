@@ -68,6 +68,23 @@ func main() {
     logrus.Fatalf("unknown error occurred: %v", err)
   }
 
+  // Gracefully deregister on provider shutdown
+  defer func() {
+    // Time to shutdown
+    unregisterReply, err := client.UnregisterProvider(ctx, &cbleGRPC.UnregistrationRequest{
+      Id:      id,
+      Name:    name,
+      Version: version,
+    })
+    if err != nil || unregisterReply.Status == commonGRPC.RPCStatus_FAILURE {
+      logrus.Fatalf("unregistration failed: %v", err)
+    } else if unregisterReply.Status == commonGRPC.RPCStatus_SUCCESS {
+      logrus.Print("Unregistration success! Shutting down...")
+    } else {
+      logrus.Fatalf("unknown error occurred: %v", err)
+    }
+  }()
+
   // Set up the provider gRPC server
   providerOpts := &providerGRPC.ProviderServerOptions{
     TLS:      false,
@@ -82,22 +99,7 @@ func main() {
   }
 
   // Provider is now ready to receive communications from CBLE
-  //   (sending SIGINT/SIGTERM will shutdown the server and
-  //   continue to shutdown below)
-
-  // Time to shutdown
-  unregisterReply, err := client.UnregisterProvider(ctx, &cbleGRPC.UnregistrationRequest{
-    Id:      id,
-    Name:    name,
-    Version: version,
-  })
-  if err != nil || unregisterReply.Status == commonGRPC.RPCStatus_FAILURE {
-    logrus.Fatalf("unregistration failed: %v", err)
-  } else if unregisterReply.Status == commonGRPC.RPCStatus_SUCCESS {
-    logrus.Print("Unregistration success! Shutting down...")
-  } else {
-    logrus.Fatalf("unknown error occurred: %v", err)
-  }
+  //   (sending SIGINT/SIGTERM will shutdown the server)
 }
 
 ```
