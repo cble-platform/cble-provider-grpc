@@ -5,7 +5,7 @@ import "google/protobuf/struct.proto";
 import "common.proto";
 
 // gRPC Service
-service ProviderServer {
+service Provider {
   rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
   rpc Deploy(DeployRequest) returns (DeployReply) {}
   rpc Destroy(DestroyRequest) returns (DestroyReply) {}

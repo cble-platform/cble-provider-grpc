@@ -16,6 +16,7 @@ message RegistrationRequest {
   string id = 1;
   string name = 2;
   string version = 3;
+  map<string, bool> features = 4;
 }
 
 message RegistrationReply {

@@ -23,6 +23,20 @@ var (
   version = "v0.1"
 )
 
+type ExampleProvider struct {
+  providerGRPC.DefaultProviderServer
+}
+
+func (ExampleProvider) Deploy(ctx context.Context, request *providerGRPC.DeployRequest) (*providerGRPC.DeployReply, error) {
+  logrus.Infof("Deploying something with example provider")
+  return &providerGRPC.DeployReply{
+    DeploymentId:    request.DeploymentId,
+    Status:          commonGRPC.RPCStatus_SUCCESS,
+    DeploymentState: &structpb.Struct{},
+    DeploymentVars:  &structpb.Struct{},
+  }, nil
+}
+
 func main() {
   conn, err := cbleGRPC.DefaultConnect()
   if err != nil {
@@ -41,6 +55,10 @@ func main() {
     Id:      id,
     Name:    name,
     Version: version,
+    Features: map[string]bool{
+      string(providerGRPC.ProviderFeature_DEPLOY):  true,
+      string(providerGRPC.ProviderFeature_DESTROY): false,
+    },
   })
   if err != nil || registerReply.Status == commonGRPC.RPCStatus_FAILURE {
     logrus.Fatalf("registration failed: %v", err)
@@ -58,20 +76,8 @@ func main() {
     Port:     int(registerReply.Port),
   }
 
-  // Provider-specific functions to run for each command
-  funcMap := &providerGRPC.ProviderServerFuncMap{
-    Deploy: func(request *providerGRPC.DeployRequest) (*providerGRPC.DeployReply, error) {
-      // Do something with the deployment request
-      return nil, nil
-    },
-    Destroy: func(request *providerGRPC.DestroyRequest) (*providerGRPC.DestroyReply, error) {
-      // Do something with the destroy request
-      return nil, nil
-    },
-  }
-
-    // Serve the provider gRPC server (blocking call)
-  if err := providerGRPC.Serve(providerOpts, funcMap); err != nil {
+  // Serve the provider gRPC server (blocking call)
+  if err := providerGRPC.Serve(ExampleProvider{}, providerOpts); err != nil {
     logrus.Fatalf("failed to server provider gRPC server: %v", err)
   }
 

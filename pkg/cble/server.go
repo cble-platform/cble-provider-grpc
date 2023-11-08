@@ -25,8 +25,9 @@ type cbleserverServer struct {
 }
 
 type registeredProvider struct {
-	ID   string
-	Port int32
+	ID       string
+	Port     int32
+	Features map[string]bool
 }
 
 type CBLEServerOptions struct {
@@ -135,8 +136,9 @@ func (s *cbleserverServer) RegisterProvider(ctx context.Context, request *Regist
 	}
 	// Map the port
 	s.RegisteredProviders[providerKey] = registeredProvider{
-		ID:   request.Id,
-		Port: port,
+		ID:       request.Id,
+		Port:     port,
+		Features: request.Features,
 	}
 	// Reply to the provider
 	return &RegistrationReply{

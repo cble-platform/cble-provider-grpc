@@ -16,15 +16,16 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type providerServer struct {
-	UnimplementedProviderServerServer
-	FuncMap *ProviderServerFuncMap
+type DefaultProviderServer struct {
+	UnimplementedProviderServer
 }
 
-type ProviderServerFuncMap struct {
-	Deploy  func(request *DeployRequest) (*DeployReply, error)
-	Destroy func(request *DestroyRequest) (*DestroyReply, error)
-}
+type ProviderFeature string
+
+const (
+	ProviderFeature_DEPLOY  ProviderFeature = "DEPLOY"
+	ProviderFeature_DESTROY ProviderFeature = "DESTORY"
+)
 
 type ProviderServerOptions struct {
 	TLS      bool
@@ -34,11 +35,8 @@ type ProviderServerOptions struct {
 }
 
 // Serve is a blocking call which returns an error if unable to serve
-func Serve(options *ProviderServerOptions, funcMap *ProviderServerFuncMap) error {
+func Serve(provider ProviderServer, options *ProviderServerOptions) error {
 	if options == nil {
-		return fmt.Errorf("options must not be nil")
-	}
-	if funcMap == nil {
 		return fmt.Errorf("options must not be nil")
 	}
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", options.Port))
@@ -57,9 +55,7 @@ func Serve(options *ProviderServerOptions, funcMap *ProviderServerFuncMap) error
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	grpcServer := grpc.NewServer(opts...)
-	RegisterProviderServerServer(grpcServer, &providerServer{
-		FuncMap: funcMap,
-	})
+	RegisterProviderServer(grpcServer, provider)
 
 	// Setup graceful shutdown signals
 	sigCh := make(chan os.Signal, 1)
@@ -80,7 +76,7 @@ func Serve(options *ProviderServerOptions, funcMap *ProviderServerFuncMap) error
 	return nil
 }
 
-func (s *providerServer) Handshake(ctx context.Context, request *common.HandshakeRequest) (*common.HandshakeReply, error) {
+func (DefaultProviderServer) Handshake(ctx context.Context, request *common.HandshakeRequest) (*common.HandshakeReply, error) {
 	if semver.Major(request.ClientVersion) != semver.Major(VERSION) {
 		return nil, fmt.Errorf("major version mismatch: server version is %s and client version is %s", VERSION, request.ClientVersion)
 	}
@@ -88,14 +84,4 @@ func (s *providerServer) Handshake(ctx context.Context, request *common.Handshak
 	return &common.HandshakeReply{
 		ServerVersion: VERSION,
 	}, nil
-}
-
-func (s *providerServer) Deploy(ctx context.Context, request *DeployRequest) (*DeployReply, error) {
-	logrus.Debugf("Deploy request for deployment %s", request.DeploymentId)
-	return s.FuncMap.Deploy(request)
-}
-
-func (s *providerServer) Destroy(ctx context.Context, request *DestroyRequest) (*DestroyReply, error) {
-	logrus.Debugf("Destroy request for deployment %s", request.DeploymentId)
-	return s.FuncMap.Destroy(request)
 }

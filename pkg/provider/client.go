@@ -41,8 +41,8 @@ func Connect(options *ProviderClientOptions) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (ProviderServerClient, error) {
-	client := NewProviderServerClient(conn)
+func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (ProviderClient, error) {
+	client := NewProviderClient(conn)
 	reply, err := client.Handshake(ctx, &common.HandshakeRequest{
 		ClientVersion: VERSION,
 	})
