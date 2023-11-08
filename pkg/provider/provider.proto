@@ -1,0 +1,23 @@
+// Setup gRPC protobuf meta
+syntax = "proto3";
+option go_package = "github.com/cble-platform/cble-provider-grpc/pkg/provider";
+import "google/protobuf/struct.proto";
+import "common.proto";
+
+// gRPC Service
+service ProviderServer {
+  rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+  rpc DeployBlueprint(DeployRequest) returns (DeployReply) {}
+}
+
+// Deploy
+message DeployRequest {
+  string deployment_id = 1;
+  bytes blueprint = 2;
+  google.protobuf.Struct templateVars = 3;
+}
+message DeployReply {
+  RPCStatus status = 1;
+  google.protobuf.Struct deployment_state = 2;
+  google.protobuf.Struct deployment_vars = 3;
+}

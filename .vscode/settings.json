@@ -1,0 +1,6 @@
+{
+  "protoc": {
+    "options": ["--proto_path=./pkg/common/"]
+  },
+  "cSpell.words": ["CBLE", "cbleserver", "protoc", "Unregistration"]
+}

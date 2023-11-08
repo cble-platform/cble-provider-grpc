@@ -1,0 +1,33 @@
+// Setup gRPC protobuf meta
+syntax = "proto3";
+option go_package = "github.com/cble-platform/cble-provider-grpc/pkg/cble";
+import "common.proto";
+
+// gRPC Service
+service CBLEServer {
+  //  (DO NOT MODIFY)
+  rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+  rpc RegisterProvider(RegistrationRequest) returns (RegistrationReply) {}
+  rpc UnregisterProvider(UnregistrationRequest) returns (UnregistrationReply) {}
+}
+
+// Registration
+message RegistrationRequest {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+}
+
+message RegistrationReply {
+  RPCStatus status = 1;
+  int32 port = 2;
+}
+
+// Unregistration
+message UnregistrationRequest {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+}
+
+message UnregistrationReply { RPCStatus status = 1; }
