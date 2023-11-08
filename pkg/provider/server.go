@@ -20,11 +20,9 @@ type DefaultProviderServer struct {
 	UnimplementedProviderServer
 }
 
-type ProviderFeature string
-
 const (
-	ProviderFeature_DEPLOY  ProviderFeature = "DEPLOY"
-	ProviderFeature_DESTROY ProviderFeature = "DESTORY"
+	ProviderFeature_DEPLOY  = "DEPLOY"
+	ProviderFeature_DESTROY = "DESTORY"
 )
 
 type ProviderServerOptions struct {
