@@ -3,7 +3,6 @@ package cble
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"net"
 	"os"
 	"os/signal"
@@ -11,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/cble-platform/cble-provider-grpc/pkg/common"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"
 	"google.golang.org/grpc"
@@ -26,7 +26,7 @@ type DefaultCBLEServer struct {
 
 type RegisteredProvider struct {
 	ID       string
-	Port     int32
+	SocketID string
 	Features map[string]bool
 }
 
@@ -104,44 +104,18 @@ func (s DefaultCBLEServer) RegisterProvider(ctx context.Context, request *Regist
 	if _, exist := s.RegisteredProviders[providerKey]; exist {
 		return nil, fmt.Errorf("provider with same name and version (%s) already registered", providerKey)
 	}
-	// Try to find an open port for the provider
-	port := int32(0)
-	retryCount := 0
-	for {
-		// Only retry 10 times
-		if retryCount >= 10 {
-			port = 0
-			break
-		}
-		// Generate a random port on [50052, 51052)
-		port = rand.Int31n(1000) + 50052
-		// Check this port isn't in use
-		portConflict := false
-		for _, v := range s.RegisteredProviders {
-			if v.Port == port {
-				portConflict = true
-				break
-			}
-		}
-		if !portConflict {
-			break
-		}
-		retryCount++
-	}
-	// Finding a port failed
-	if port == 0 {
-		return nil, fmt.Errorf("failed to find open port for provider gRPC server")
-	}
+	// Generate random UUID for socket
+	socketId := uuid.NewString()
 	// Map the port
 	s.RegisteredProviders[providerKey] = RegisteredProvider{
 		ID:       request.Id,
-		Port:     port,
+		SocketID: socketId,
 		Features: request.Features,
 	}
 	// Reply to the provider
 	return &RegistrationReply{
-		Status: common.RPCStatus_SUCCESS,
-		Port:   port,
+		Status:   common.RPCStatus_SUCCESS,
+		SocketId: socketId,
 	}, nil
 }
 

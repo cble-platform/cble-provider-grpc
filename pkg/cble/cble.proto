@@ -21,7 +21,7 @@ message RegistrationRequest {
 
 message RegistrationReply {
   RPCStatus status = 1;
-  int32 port = 2;
+  string socket_id = 2;
 }
 
 // Unregistration

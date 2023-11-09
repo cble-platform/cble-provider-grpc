@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net"
 
 	common "github.com/cble-platform/cble-provider-grpc/pkg/common"
 	"github.com/sirupsen/logrus"
@@ -12,14 +13,18 @@ import (
 )
 
 type ProviderClientOptions struct {
-	TLS    bool
-	CAFile string
-	Port   int
+	TLS      bool
+	CAFile   string
+	SocketID string
 }
 
 // Connect returns a ProviderServer gRPC connection to the Provider gRPC server for use with the gRPC client
 func Connect(options *ProviderClientOptions) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
+	var opts []grpc.DialOption = []grpc.DialOption{
+		grpc.WithContextDialer(func(ctx context.Context, addr string) (net.Conn, error) {
+			return net.Dial("unix", addr)
+		}),
+	}
 	if options.TLS {
 		if options.CAFile == "" {
 			return nil, fmt.Errorf("CA file must be provided for TLS")
@@ -33,7 +38,7 @@ func Connect(options *ProviderClientOptions) (*grpc.ClientConn, error) {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", options.Port), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("/tmp/cble-provider-grpc-%s", options.SocketID), opts...)
 	if err != nil {
 		return nil, fmt.Errorf("fail to dial: %v", err)
 	}

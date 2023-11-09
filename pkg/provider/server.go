@@ -29,7 +29,7 @@ type ProviderServerOptions struct {
 	TLS      bool
 	CertFile string
 	KeyFile  string
-	Port     int
+	SocketID string
 }
 
 // Serve is a blocking call which returns an error if unable to serve
@@ -37,7 +37,7 @@ func Serve(provider ProviderServer, options *ProviderServerOptions) error {
 	if options == nil {
 		return fmt.Errorf("options must not be nil")
 	}
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", options.Port))
+	lis, err := net.Listen("unix", fmt.Sprintf("/tmp/cble-provider-grpc-%s", options.SocketID))
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
