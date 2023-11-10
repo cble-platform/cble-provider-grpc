@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	common "github.com/cble-platform/cble-provider-grpc/pkg/common"
 	"github.com/sirupsen/logrus"
@@ -48,9 +49,15 @@ func Connect(options *ProviderClientOptions) (*grpc.ClientConn, error) {
 
 func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (ProviderClient, error) {
 	client := NewProviderClient(conn)
-	reply, err := client.Handshake(ctx, &common.HandshakeRequest{
+
+	// Create a context with a 30 seconds timeout. If doesn't handshake in
+	//   30 seconds (server never came up), something is wrong
+	timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	reply, err := client.Handshake(timeoutCtx, &common.HandshakeRequest{
 		ClientVersion: VERSION,
-	})
+	}, grpc.WaitForReady(true))
 	if err != nil {
 		return client, fmt.Errorf("handshake failed: %v", err)
 	}
