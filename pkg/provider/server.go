@@ -22,7 +22,7 @@ type DefaultProviderServer struct {
 
 const (
 	ProviderFeature_DEPLOY  = "DEPLOY"
-	ProviderFeature_DESTROY = "DESTORY"
+	ProviderFeature_DESTROY = "DESTROY"
 )
 
 type ProviderServerOptions struct {
