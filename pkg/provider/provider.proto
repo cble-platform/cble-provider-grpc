@@ -25,12 +25,24 @@ message DeployRequest {
   google.protobuf.Struct deployment_vars = 5;
 }
 
+enum ResourceType {
+  HOST = 0;
+  NETWORK = 1;
+  ROUTER = 2;
+}
+
+message DeployResource {
+  string key = 1;
+  ResourceType type = 2;
+}
+
 message DeployReply {
   string deployment_id = 1;
   RPCStatus status = 2;
   google.protobuf.Struct deployment_state = 3;
   google.protobuf.Struct deployment_vars = 4;
   repeated string errors = 5;
+  repeated DeployResource resources = 6;
 }
 
 // Destroy

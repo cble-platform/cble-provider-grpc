@@ -2,5 +2,8 @@
   "protoc": {
     "options": ["--proto_path=./pkg/common/"]
   },
-  "cSpell.words": ["CBLE", "cbleserver", "protoc", "Unregistration"]
+  "cSpell.words": ["CBLE", "cbleserver", "protoc", "Unregistration"],
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/cble-platform/provider-openstack/2-add-vm-consoles/config.schema.json": "config.yaml"
+  }
 }
