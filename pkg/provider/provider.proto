@@ -10,6 +10,7 @@ service Provider {
   rpc Configure(ConfigureRequest) returns (RPCStatusReply) {}
   rpc Deploy(DeployRequest) returns (DeployReply) {}
   rpc Destroy(DestroyRequest) returns (DestroyReply) {}
+  rpc GetConsole(GetConsoleRequest) returns (GetConsoleReply) {}
 }
 
 // Configure
@@ -47,4 +48,18 @@ message DestroyReply {
   google.protobuf.Struct deployment_state = 3;
   google.protobuf.Struct deployment_vars = 4;
   repeated string errors = 5;
+}
+
+// GetConsole
+message GetConsoleRequest {
+  string deployment_id = 1;
+  google.protobuf.Struct deployment_state = 2;
+  google.protobuf.Struct deployment_vars = 3;
+}
+
+message GetConsoleReply {
+  string deployment_id = 1;
+  RPCStatus status = 2;
+  string console = 3;
+  repeated string errors = 4;
 }
