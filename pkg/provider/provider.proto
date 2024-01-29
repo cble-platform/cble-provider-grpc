@@ -33,7 +33,9 @@ enum ResourceType {
 
 message DeployResource {
   string key = 1;
-  ResourceType type = 2;
+  string deployment_id = 2;
+  string name = 3;
+  ResourceType type = 4;
 }
 
 message DeployReply {
