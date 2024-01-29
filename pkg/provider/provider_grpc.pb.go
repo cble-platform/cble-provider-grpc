@@ -22,11 +22,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Provider_Handshake_FullMethodName  = "/Provider/Handshake"
-	Provider_Configure_FullMethodName  = "/Provider/Configure"
-	Provider_Deploy_FullMethodName     = "/Provider/Deploy"
-	Provider_Destroy_FullMethodName    = "/Provider/Destroy"
-	Provider_GetConsole_FullMethodName = "/Provider/GetConsole"
+	Provider_Handshake_FullMethodName       = "/Provider/Handshake"
+	Provider_Configure_FullMethodName       = "/Provider/Configure"
+	Provider_Deploy_FullMethodName          = "/Provider/Deploy"
+	Provider_Destroy_FullMethodName         = "/Provider/Destroy"
+	Provider_GetConsole_FullMethodName      = "/Provider/GetConsole"
+	Provider_GetResourceList_FullMethodName = "/Provider/GetResourceList"
 )
 
 // ProviderClient is the client API for Provider service.
@@ -38,6 +39,7 @@ type ProviderClient interface {
 	Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error)
 	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyReply, error)
 	GetConsole(ctx context.Context, in *GetConsoleRequest, opts ...grpc.CallOption) (*GetConsoleReply, error)
+	GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListReply, error)
 }
 
 type providerClient struct {
@@ -93,6 +95,15 @@ func (c *providerClient) GetConsole(ctx context.Context, in *GetConsoleRequest, 
 	return out, nil
 }
 
+func (c *providerClient) GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListReply, error) {
+	out := new(GetResourceListReply)
+	err := c.cc.Invoke(ctx, Provider_GetResourceList_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProviderServer is the server API for Provider service.
 // All implementations must embed UnimplementedProviderServer
 // for forward compatibility
@@ -102,6 +113,7 @@ type ProviderServer interface {
 	Deploy(context.Context, *DeployRequest) (*DeployReply, error)
 	Destroy(context.Context, *DestroyRequest) (*DestroyReply, error)
 	GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error)
+	GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListReply, error)
 	mustEmbedUnimplementedProviderServer()
 }
 
@@ -123,6 +135,9 @@ func (UnimplementedProviderServer) Destroy(context.Context, *DestroyRequest) (*D
 }
 func (UnimplementedProviderServer) GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConsole not implemented")
+}
+func (UnimplementedProviderServer) GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResourceList not implemented")
 }
 func (UnimplementedProviderServer) mustEmbedUnimplementedProviderServer() {}
 
@@ -227,6 +242,24 @@ func _Provider_GetConsole_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_GetResourceList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).GetResourceList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_GetResourceList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).GetResourceList(ctx, req.(*GetResourceListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Provider_ServiceDesc is the grpc.ServiceDesc for Provider service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -253,6 +286,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConsole",
 			Handler:    _Provider_GetConsole_Handler,
+		},
+		{
+			MethodName: "GetResourceList",
+			Handler:    _Provider_GetResourceList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -11,6 +11,7 @@ service Provider {
   rpc Deploy(DeployRequest) returns (DeployReply) {}
   rpc Destroy(DestroyRequest) returns (DestroyReply) {}
   rpc GetConsole(GetConsoleRequest) returns (GetConsoleReply) {}
+  rpc GetResourceList(GetResourceListRequest) returns (GetResourceListReply) {}
 }
 
 // Configure
@@ -25,26 +26,12 @@ message DeployRequest {
   google.protobuf.Struct deployment_vars = 5;
 }
 
-enum ResourceType {
-  HOST = 0;
-  NETWORK = 1;
-  ROUTER = 2;
-}
-
-message DeployResource {
-  string key = 1;
-  string deployment_id = 2;
-  string name = 3;
-  ResourceType type = 4;
-}
-
 message DeployReply {
-  string deployment_id = 1;
-  RPCStatus status = 2;
-  google.protobuf.Struct deployment_state = 3;
-  google.protobuf.Struct deployment_vars = 4;
-  repeated string errors = 5;
-  repeated DeployResource resources = 6;
+  RPCStatus status = 1;
+  repeated string errors = 2;
+  string deployment_id = 3;
+  google.protobuf.Struct deployment_state = 4;
+  google.protobuf.Struct deployment_vars = 5;
 }
 
 // Destroy
@@ -57,11 +44,11 @@ message DestroyRequest {
 }
 
 message DestroyReply {
-  string deployment_id = 1;
-  RPCStatus status = 2;
-  google.protobuf.Struct deployment_state = 3;
-  google.protobuf.Struct deployment_vars = 4;
-  repeated string errors = 5;
+  RPCStatus status = 1;
+  repeated string errors = 2;
+  string deployment_id = 3;
+  google.protobuf.Struct deployment_state = 4;
+  google.protobuf.Struct deployment_vars = 5;
 }
 
 // GetConsole
@@ -73,8 +60,38 @@ message GetConsoleRequest {
 }
 
 message GetConsoleReply {
-  string deployment_id = 1;
-  RPCStatus status = 2;
+  RPCStatus status = 1;
+  repeated string errors = 2;
   string console = 3;
-  repeated string errors = 4;
+  string deployment_id = 4;
+}
+
+// GetResourceList
+
+enum ResourceType {
+  HOST = 0;
+  NETWORK = 1;
+  ROUTER = 2;
+}
+
+message GetResourceListRequest {
+  string deployment_id = 1;
+  bytes blueprint = 2;
+  google.protobuf.Struct templateVars = 3;
+  google.protobuf.Struct deployment_state = 4;
+  google.protobuf.Struct deployment_vars = 5;
+}
+
+message Resource {
+  string key = 1;
+  string deployment_id = 2;
+  string name = 3;
+  ResourceType type = 4;
+}
+
+message GetResourceListReply {
+  RPCStatus status = 1;
+  repeated string errors = 2;
+  string deployment_id = 3;
+  repeated Resource resources = 4;
 }
