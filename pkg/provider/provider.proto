@@ -53,8 +53,9 @@ message DestroyReply {
 // GetConsole
 message GetConsoleRequest {
   string deployment_id = 1;
-  google.protobuf.Struct deployment_state = 2;
-  google.protobuf.Struct deployment_vars = 3;
+  string host_key = 2;
+  google.protobuf.Struct deployment_state = 3;
+  google.protobuf.Struct deployment_vars = 4;
 }
 
 message GetConsoleReply {
