@@ -22,12 +22,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Provider_Handshake_FullMethodName       = "/Provider/Handshake"
-	Provider_Configure_FullMethodName       = "/Provider/Configure"
-	Provider_Deploy_FullMethodName          = "/Provider/Deploy"
-	Provider_Destroy_FullMethodName         = "/Provider/Destroy"
-	Provider_GetConsole_FullMethodName      = "/Provider/GetConsole"
-	Provider_GetResourceList_FullMethodName = "/Provider/GetResourceList"
+	Provider_Handshake_FullMethodName            = "/Provider/Handshake"
+	Provider_Configure_FullMethodName            = "/Provider/Configure"
+	Provider_GenerateDependencies_FullMethodName = "/Provider/GenerateDependencies"
+	Provider_DeployResource_FullMethodName       = "/Provider/DeployResource"
+	Provider_DestroyResource_FullMethodName      = "/Provider/DestroyResource"
+	Provider_GetConsole_FullMethodName           = "/Provider/GetConsole"
 )
 
 // ProviderClient is the client API for Provider service.
@@ -35,11 +35,11 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProviderClient interface {
 	Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error)
-	Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*common.RPCStatusReply, error)
-	Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error)
-	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyReply, error)
+	Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*ConfigureReply, error)
+	GenerateDependencies(ctx context.Context, in *GenerateDependenciesRequest, opts ...grpc.CallOption) (*GenerateDependenciesReply, error)
+	DeployResource(ctx context.Context, in *DeployResourceRequest, opts ...grpc.CallOption) (*DeployResourceReply, error)
+	DestroyResource(ctx context.Context, in *DestroyResourceRequest, opts ...grpc.CallOption) (*DestroyResourceReply, error)
 	GetConsole(ctx context.Context, in *GetConsoleRequest, opts ...grpc.CallOption) (*GetConsoleReply, error)
-	GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListReply, error)
 }
 
 type providerClient struct {
@@ -59,8 +59,8 @@ func (c *providerClient) Handshake(ctx context.Context, in *common.HandshakeRequ
 	return out, nil
 }
 
-func (c *providerClient) Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*common.RPCStatusReply, error) {
-	out := new(common.RPCStatusReply)
+func (c *providerClient) Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*ConfigureReply, error) {
+	out := new(ConfigureReply)
 	err := c.cc.Invoke(ctx, Provider_Configure_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -68,18 +68,27 @@ func (c *providerClient) Configure(ctx context.Context, in *ConfigureRequest, op
 	return out, nil
 }
 
-func (c *providerClient) Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployReply, error) {
-	out := new(DeployReply)
-	err := c.cc.Invoke(ctx, Provider_Deploy_FullMethodName, in, out, opts...)
+func (c *providerClient) GenerateDependencies(ctx context.Context, in *GenerateDependenciesRequest, opts ...grpc.CallOption) (*GenerateDependenciesReply, error) {
+	out := new(GenerateDependenciesReply)
+	err := c.cc.Invoke(ctx, Provider_GenerateDependencies_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *providerClient) Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyReply, error) {
-	out := new(DestroyReply)
-	err := c.cc.Invoke(ctx, Provider_Destroy_FullMethodName, in, out, opts...)
+func (c *providerClient) DeployResource(ctx context.Context, in *DeployResourceRequest, opts ...grpc.CallOption) (*DeployResourceReply, error) {
+	out := new(DeployResourceReply)
+	err := c.cc.Invoke(ctx, Provider_DeployResource_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) DestroyResource(ctx context.Context, in *DestroyResourceRequest, opts ...grpc.CallOption) (*DestroyResourceReply, error) {
+	out := new(DestroyResourceReply)
+	err := c.cc.Invoke(ctx, Provider_DestroyResource_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,25 +104,16 @@ func (c *providerClient) GetConsole(ctx context.Context, in *GetConsoleRequest, 
 	return out, nil
 }
 
-func (c *providerClient) GetResourceList(ctx context.Context, in *GetResourceListRequest, opts ...grpc.CallOption) (*GetResourceListReply, error) {
-	out := new(GetResourceListReply)
-	err := c.cc.Invoke(ctx, Provider_GetResourceList_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ProviderServer is the server API for Provider service.
 // All implementations must embed UnimplementedProviderServer
 // for forward compatibility
 type ProviderServer interface {
 	Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error)
-	Configure(context.Context, *ConfigureRequest) (*common.RPCStatusReply, error)
-	Deploy(context.Context, *DeployRequest) (*DeployReply, error)
-	Destroy(context.Context, *DestroyRequest) (*DestroyReply, error)
+	Configure(context.Context, *ConfigureRequest) (*ConfigureReply, error)
+	GenerateDependencies(context.Context, *GenerateDependenciesRequest) (*GenerateDependenciesReply, error)
+	DeployResource(context.Context, *DeployResourceRequest) (*DeployResourceReply, error)
+	DestroyResource(context.Context, *DestroyResourceRequest) (*DestroyResourceReply, error)
 	GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error)
-	GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListReply, error)
 	mustEmbedUnimplementedProviderServer()
 }
 
@@ -124,20 +124,20 @@ type UnimplementedProviderServer struct {
 func (UnimplementedProviderServer) Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Handshake not implemented")
 }
-func (UnimplementedProviderServer) Configure(context.Context, *ConfigureRequest) (*common.RPCStatusReply, error) {
+func (UnimplementedProviderServer) Configure(context.Context, *ConfigureRequest) (*ConfigureReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Configure not implemented")
 }
-func (UnimplementedProviderServer) Deploy(context.Context, *DeployRequest) (*DeployReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Deploy not implemented")
+func (UnimplementedProviderServer) GenerateDependencies(context.Context, *GenerateDependenciesRequest) (*GenerateDependenciesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateDependencies not implemented")
 }
-func (UnimplementedProviderServer) Destroy(context.Context, *DestroyRequest) (*DestroyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Destroy not implemented")
+func (UnimplementedProviderServer) DeployResource(context.Context, *DeployResourceRequest) (*DeployResourceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeployResource not implemented")
+}
+func (UnimplementedProviderServer) DestroyResource(context.Context, *DestroyResourceRequest) (*DestroyResourceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DestroyResource not implemented")
 }
 func (UnimplementedProviderServer) GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConsole not implemented")
-}
-func (UnimplementedProviderServer) GetResourceList(context.Context, *GetResourceListRequest) (*GetResourceListReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResourceList not implemented")
 }
 func (UnimplementedProviderServer) mustEmbedUnimplementedProviderServer() {}
 
@@ -188,38 +188,56 @@ func _Provider_Configure_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Provider_Deploy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeployRequest)
+func _Provider_GenerateDependencies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateDependenciesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProviderServer).Deploy(ctx, in)
+		return srv.(ProviderServer).GenerateDependencies(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Provider_Deploy_FullMethodName,
+		FullMethod: Provider_GenerateDependencies_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServer).Deploy(ctx, req.(*DeployRequest))
+		return srv.(ProviderServer).GenerateDependencies(ctx, req.(*GenerateDependenciesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Provider_Destroy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DestroyRequest)
+func _Provider_DeployResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeployResourceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProviderServer).Destroy(ctx, in)
+		return srv.(ProviderServer).DeployResource(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Provider_Destroy_FullMethodName,
+		FullMethod: Provider_DeployResource_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServer).Destroy(ctx, req.(*DestroyRequest))
+		return srv.(ProviderServer).DeployResource(ctx, req.(*DeployResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_DestroyResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DestroyResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).DestroyResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_DestroyResource_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).DestroyResource(ctx, req.(*DestroyResourceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -242,24 +260,6 @@ func _Provider_GetConsole_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Provider_GetResourceList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetResourceListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProviderServer).GetResourceList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Provider_GetResourceList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServer).GetResourceList(ctx, req.(*GetResourceListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Provider_ServiceDesc is the grpc.ServiceDesc for Provider service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,20 +276,20 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Provider_Configure_Handler,
 		},
 		{
-			MethodName: "Deploy",
-			Handler:    _Provider_Deploy_Handler,
+			MethodName: "GenerateDependencies",
+			Handler:    _Provider_GenerateDependencies_Handler,
 		},
 		{
-			MethodName: "Destroy",
-			Handler:    _Provider_Destroy_Handler,
+			MethodName: "DeployResource",
+			Handler:    _Provider_DeployResource_Handler,
+		},
+		{
+			MethodName: "DestroyResource",
+			Handler:    _Provider_DestroyResource_Handler,
 		},
 		{
 			MethodName: "GetConsole",
 			Handler:    _Provider_GetConsole_Handler,
-		},
-		{
-			MethodName: "GetResourceList",
-			Handler:    _Provider_GetResourceList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
