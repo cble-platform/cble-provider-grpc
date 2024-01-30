@@ -11,12 +11,18 @@ service CBLE {
   rpc UnregisterProvider(UnregistrationRequest) returns (UnregistrationReply) {}
 }
 
+message ProviderFeatures {
+  bool deploy = 1;
+  bool destroy = 2;
+  bool console = 3;
+}
+
 // Registration
 message RegistrationRequest {
   string id = 1;
   string name = 2;
   string version = 3;
-  map<string, bool> features = 4;
+  ProviderFeatures features = 4;
 }
 
 message RegistrationReply {
