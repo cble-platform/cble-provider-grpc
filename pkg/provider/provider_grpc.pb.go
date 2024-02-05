@@ -25,6 +25,7 @@ const (
 	Provider_Handshake_FullMethodName            = "/Provider/Handshake"
 	Provider_Configure_FullMethodName            = "/Provider/Configure"
 	Provider_GenerateDependencies_FullMethodName = "/Provider/GenerateDependencies"
+	Provider_RetrieveData_FullMethodName         = "/Provider/RetrieveData"
 	Provider_DeployResource_FullMethodName       = "/Provider/DeployResource"
 	Provider_DestroyResource_FullMethodName      = "/Provider/DestroyResource"
 	Provider_GetConsole_FullMethodName           = "/Provider/GetConsole"
@@ -37,6 +38,7 @@ type ProviderClient interface {
 	Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error)
 	Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*ConfigureReply, error)
 	GenerateDependencies(ctx context.Context, in *GenerateDependenciesRequest, opts ...grpc.CallOption) (*GenerateDependenciesReply, error)
+	RetrieveData(ctx context.Context, in *RetrieveDataRequest, opts ...grpc.CallOption) (*RetrieveDataReply, error)
 	DeployResource(ctx context.Context, in *DeployResourceRequest, opts ...grpc.CallOption) (*DeployResourceReply, error)
 	DestroyResource(ctx context.Context, in *DestroyResourceRequest, opts ...grpc.CallOption) (*DestroyResourceReply, error)
 	GetConsole(ctx context.Context, in *GetConsoleRequest, opts ...grpc.CallOption) (*GetConsoleReply, error)
@@ -77,6 +79,15 @@ func (c *providerClient) GenerateDependencies(ctx context.Context, in *GenerateD
 	return out, nil
 }
 
+func (c *providerClient) RetrieveData(ctx context.Context, in *RetrieveDataRequest, opts ...grpc.CallOption) (*RetrieveDataReply, error) {
+	out := new(RetrieveDataReply)
+	err := c.cc.Invoke(ctx, Provider_RetrieveData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *providerClient) DeployResource(ctx context.Context, in *DeployResourceRequest, opts ...grpc.CallOption) (*DeployResourceReply, error) {
 	out := new(DeployResourceReply)
 	err := c.cc.Invoke(ctx, Provider_DeployResource_FullMethodName, in, out, opts...)
@@ -111,6 +122,7 @@ type ProviderServer interface {
 	Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error)
 	Configure(context.Context, *ConfigureRequest) (*ConfigureReply, error)
 	GenerateDependencies(context.Context, *GenerateDependenciesRequest) (*GenerateDependenciesReply, error)
+	RetrieveData(context.Context, *RetrieveDataRequest) (*RetrieveDataReply, error)
 	DeployResource(context.Context, *DeployResourceRequest) (*DeployResourceReply, error)
 	DestroyResource(context.Context, *DestroyResourceRequest) (*DestroyResourceReply, error)
 	GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error)
@@ -129,6 +141,9 @@ func (UnimplementedProviderServer) Configure(context.Context, *ConfigureRequest)
 }
 func (UnimplementedProviderServer) GenerateDependencies(context.Context, *GenerateDependenciesRequest) (*GenerateDependenciesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateDependencies not implemented")
+}
+func (UnimplementedProviderServer) RetrieveData(context.Context, *RetrieveDataRequest) (*RetrieveDataReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RetrieveData not implemented")
 }
 func (UnimplementedProviderServer) DeployResource(context.Context, *DeployResourceRequest) (*DeployResourceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeployResource not implemented")
@@ -206,6 +221,24 @@ func _Provider_GenerateDependencies_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_RetrieveData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetrieveDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).RetrieveData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_RetrieveData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).RetrieveData(ctx, req.(*RetrieveDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Provider_DeployResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeployResourceRequest)
 	if err := dec(in); err != nil {
@@ -278,6 +311,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateDependencies",
 			Handler:    _Provider_GenerateDependencies_Handler,
+		},
+		{
+			MethodName: "RetrieveData",
+			Handler:    _Provider_RetrieveData_Handler,
 		},
 		{
 			MethodName: "DeployResource",

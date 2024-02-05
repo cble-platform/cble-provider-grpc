@@ -9,6 +9,7 @@ service Provider {
   rpc Configure(ConfigureRequest) returns (ConfigureReply) {}
   rpc GenerateDependencies(GenerateDependenciesRequest)
       returns (GenerateDependenciesReply) {}
+  rpc RetrieveData(RetrieveDataRequest) returns (RetrieveDataReply) {}
   rpc DeployResource(DeployResourceRequest) returns (DeployResourceReply) {}
   rpc DestroyResource(DestroyResourceRequest) returns (DestroyResourceReply) {}
   rpc GetConsole(GetConsoleRequest) returns (GetConsoleReply) {}
@@ -40,6 +41,24 @@ message GenerateDependenciesReply {
   bool success = 1;
   optional string errors = 2;
   repeated string dependencies = 3;
+}
+
+// RetrieveData
+message RetrieveDataRequest {
+  // From the *ent.Deployment
+  Deployment deployment = 1;
+  // From the *ent.Resource
+  Resource resource = 2;
+  // From the *ent.DeploymentNode
+  map<string, string> vars = 3;
+  // Map of maps from all dependency nodes
+  map<string, DependencyVars> dependencyVars = 4;
+}
+
+message RetrieveDataReply {
+  bool success = 1;
+  optional string errors = 2;
+  map<string, string> updatedVars = 3; // To update the *ent.DeploymentNode
 }
 
 // Deploy
