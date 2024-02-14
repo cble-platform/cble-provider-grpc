@@ -29,6 +29,7 @@ const (
 	Provider_DeployResource_FullMethodName       = "/Provider/DeployResource"
 	Provider_DestroyResource_FullMethodName      = "/Provider/DestroyResource"
 	Provider_GetConsole_FullMethodName           = "/Provider/GetConsole"
+	Provider_ResourcePower_FullMethodName        = "/Provider/ResourcePower"
 )
 
 // ProviderClient is the client API for Provider service.
@@ -42,6 +43,7 @@ type ProviderClient interface {
 	DeployResource(ctx context.Context, in *DeployResourceRequest, opts ...grpc.CallOption) (*DeployResourceReply, error)
 	DestroyResource(ctx context.Context, in *DestroyResourceRequest, opts ...grpc.CallOption) (*DestroyResourceReply, error)
 	GetConsole(ctx context.Context, in *GetConsoleRequest, opts ...grpc.CallOption) (*GetConsoleReply, error)
+	ResourcePower(ctx context.Context, in *ResourcePowerRequest, opts ...grpc.CallOption) (*ResourcePowerReply, error)
 }
 
 type providerClient struct {
@@ -115,6 +117,15 @@ func (c *providerClient) GetConsole(ctx context.Context, in *GetConsoleRequest, 
 	return out, nil
 }
 
+func (c *providerClient) ResourcePower(ctx context.Context, in *ResourcePowerRequest, opts ...grpc.CallOption) (*ResourcePowerReply, error) {
+	out := new(ResourcePowerReply)
+	err := c.cc.Invoke(ctx, Provider_ResourcePower_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProviderServer is the server API for Provider service.
 // All implementations must embed UnimplementedProviderServer
 // for forward compatibility
@@ -126,6 +137,7 @@ type ProviderServer interface {
 	DeployResource(context.Context, *DeployResourceRequest) (*DeployResourceReply, error)
 	DestroyResource(context.Context, *DestroyResourceRequest) (*DestroyResourceReply, error)
 	GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error)
+	ResourcePower(context.Context, *ResourcePowerRequest) (*ResourcePowerReply, error)
 	mustEmbedUnimplementedProviderServer()
 }
 
@@ -153,6 +165,9 @@ func (UnimplementedProviderServer) DestroyResource(context.Context, *DestroyReso
 }
 func (UnimplementedProviderServer) GetConsole(context.Context, *GetConsoleRequest) (*GetConsoleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConsole not implemented")
+}
+func (UnimplementedProviderServer) ResourcePower(context.Context, *ResourcePowerRequest) (*ResourcePowerReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResourcePower not implemented")
 }
 func (UnimplementedProviderServer) mustEmbedUnimplementedProviderServer() {}
 
@@ -293,6 +308,24 @@ func _Provider_GetConsole_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_ResourcePower_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResourcePowerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).ResourcePower(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_ResourcePower_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).ResourcePower(ctx, req.(*ResourcePowerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Provider_ServiceDesc is the grpc.ServiceDesc for Provider service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -327,6 +360,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConsole",
 			Handler:    _Provider_GetConsole_Handler,
+		},
+		{
+			MethodName: "ResourcePower",
+			Handler:    _Provider_ResourcePower_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

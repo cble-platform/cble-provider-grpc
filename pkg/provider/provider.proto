@@ -13,6 +13,7 @@ service Provider {
   rpc DeployResource(DeployResourceRequest) returns (DeployResourceReply) {}
   rpc DestroyResource(DestroyResourceRequest) returns (DestroyResourceReply) {}
   rpc GetConsole(GetConsoleRequest) returns (GetConsoleReply) {}
+  rpc ResourcePower(ResourcePowerRequest) returns (ResourcePowerReply) {}
 }
 
 // Models
@@ -100,8 +101,26 @@ message GetConsoleRequest {
 
 message GetConsoleReply {
   bool success = 1;
-  repeated string errors = 2;
+  optional string errors = 2;
   string console = 3;
+}
+
+enum PowerState {
+  ON = 0;
+  OFF = 1;
+  RESET = 2;
+}
+
+// ResourcePower
+message ResourcePowerRequest {
+  Resource resource = 1;        // From the *ent.Resource
+  map<string, string> vars = 2; // From the *ent.DeploymentNode
+  PowerState state = 3;         // The intended power state
+}
+
+message ResourcePowerReply {
+  bool success = 1;
+  optional string errors = 2;
 }
 
 // // GetResourceList
