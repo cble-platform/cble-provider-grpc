@@ -36,20 +36,15 @@ message ConfigureRequest { bytes config = 1; }
 message ConfigureReply { bool success = 1; }
 
 // ExtractResourceMetadata
-message Dependency {
-  // Resource requiring a dependency
-  string dependent_resource_key = 1;
-  // Resource depended on
-  string dependency_resource_key = 2;
-}
-
 message Features {
   bool power = 1;
   bool console = 2;
 }
 
 message Metadata {
-  repeated Dependency dependencies = 1;
+  // Keys of all resources this resource depends on
+  repeated string depends_on_keys = 1;
+  // Features supported with this resource
   Features features = 2;
 }
 

@@ -59,6 +59,6 @@ func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (CBLEClient, 
 	if err != nil {
 		return client, fmt.Errorf("handshake failed: %v", err)
 	}
-	logrus.Debugf("Connected to CBLE Server (v%s)", reply.ServerVersion)
+	logrus.WithField("component", "CBLE_GRPC_CLIENT").Debugf("Connected to CBLE Server (v%s)", reply.ServerVersion)
 	return client, nil
 }
