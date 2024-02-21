@@ -22,14 +22,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Provider_Handshake_FullMethodName            = "/Provider/Handshake"
-	Provider_Configure_FullMethodName            = "/Provider/Configure"
-	Provider_GenerateDependencies_FullMethodName = "/Provider/GenerateDependencies"
-	Provider_RetrieveData_FullMethodName         = "/Provider/RetrieveData"
-	Provider_DeployResource_FullMethodName       = "/Provider/DeployResource"
-	Provider_DestroyResource_FullMethodName      = "/Provider/DestroyResource"
-	Provider_GetConsole_FullMethodName           = "/Provider/GetConsole"
-	Provider_ResourcePower_FullMethodName        = "/Provider/ResourcePower"
+	Provider_Handshake_FullMethodName               = "/Provider/Handshake"
+	Provider_Configure_FullMethodName               = "/Provider/Configure"
+	Provider_ExtractResourceMetadata_FullMethodName = "/Provider/ExtractResourceMetadata"
+	Provider_RetrieveData_FullMethodName            = "/Provider/RetrieveData"
+	Provider_DeployResource_FullMethodName          = "/Provider/DeployResource"
+	Provider_DestroyResource_FullMethodName         = "/Provider/DestroyResource"
+	Provider_GetConsole_FullMethodName              = "/Provider/GetConsole"
+	Provider_ResourcePower_FullMethodName           = "/Provider/ResourcePower"
 )
 
 // ProviderClient is the client API for Provider service.
@@ -38,7 +38,7 @@ const (
 type ProviderClient interface {
 	Handshake(ctx context.Context, in *common.HandshakeRequest, opts ...grpc.CallOption) (*common.HandshakeReply, error)
 	Configure(ctx context.Context, in *ConfigureRequest, opts ...grpc.CallOption) (*ConfigureReply, error)
-	GenerateDependencies(ctx context.Context, in *GenerateDependenciesRequest, opts ...grpc.CallOption) (*GenerateDependenciesReply, error)
+	ExtractResourceMetadata(ctx context.Context, in *ExtractResourceMetadataRequest, opts ...grpc.CallOption) (*ExtractResourceMetadataReply, error)
 	RetrieveData(ctx context.Context, in *RetrieveDataRequest, opts ...grpc.CallOption) (*RetrieveDataReply, error)
 	DeployResource(ctx context.Context, in *DeployResourceRequest, opts ...grpc.CallOption) (*DeployResourceReply, error)
 	DestroyResource(ctx context.Context, in *DestroyResourceRequest, opts ...grpc.CallOption) (*DestroyResourceReply, error)
@@ -72,9 +72,9 @@ func (c *providerClient) Configure(ctx context.Context, in *ConfigureRequest, op
 	return out, nil
 }
 
-func (c *providerClient) GenerateDependencies(ctx context.Context, in *GenerateDependenciesRequest, opts ...grpc.CallOption) (*GenerateDependenciesReply, error) {
-	out := new(GenerateDependenciesReply)
-	err := c.cc.Invoke(ctx, Provider_GenerateDependencies_FullMethodName, in, out, opts...)
+func (c *providerClient) ExtractResourceMetadata(ctx context.Context, in *ExtractResourceMetadataRequest, opts ...grpc.CallOption) (*ExtractResourceMetadataReply, error) {
+	out := new(ExtractResourceMetadataReply)
+	err := c.cc.Invoke(ctx, Provider_ExtractResourceMetadata_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (c *providerClient) ResourcePower(ctx context.Context, in *ResourcePowerReq
 type ProviderServer interface {
 	Handshake(context.Context, *common.HandshakeRequest) (*common.HandshakeReply, error)
 	Configure(context.Context, *ConfigureRequest) (*ConfigureReply, error)
-	GenerateDependencies(context.Context, *GenerateDependenciesRequest) (*GenerateDependenciesReply, error)
+	ExtractResourceMetadata(context.Context, *ExtractResourceMetadataRequest) (*ExtractResourceMetadataReply, error)
 	RetrieveData(context.Context, *RetrieveDataRequest) (*RetrieveDataReply, error)
 	DeployResource(context.Context, *DeployResourceRequest) (*DeployResourceReply, error)
 	DestroyResource(context.Context, *DestroyResourceRequest) (*DestroyResourceReply, error)
@@ -151,8 +151,8 @@ func (UnimplementedProviderServer) Handshake(context.Context, *common.HandshakeR
 func (UnimplementedProviderServer) Configure(context.Context, *ConfigureRequest) (*ConfigureReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Configure not implemented")
 }
-func (UnimplementedProviderServer) GenerateDependencies(context.Context, *GenerateDependenciesRequest) (*GenerateDependenciesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GenerateDependencies not implemented")
+func (UnimplementedProviderServer) ExtractResourceMetadata(context.Context, *ExtractResourceMetadataRequest) (*ExtractResourceMetadataReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExtractResourceMetadata not implemented")
 }
 func (UnimplementedProviderServer) RetrieveData(context.Context, *RetrieveDataRequest) (*RetrieveDataReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RetrieveData not implemented")
@@ -218,20 +218,20 @@ func _Provider_Configure_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Provider_GenerateDependencies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateDependenciesRequest)
+func _Provider_ExtractResourceMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExtractResourceMetadataRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProviderServer).GenerateDependencies(ctx, in)
+		return srv.(ProviderServer).ExtractResourceMetadata(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Provider_GenerateDependencies_FullMethodName,
+		FullMethod: Provider_ExtractResourceMetadata_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServer).GenerateDependencies(ctx, req.(*GenerateDependenciesRequest))
+		return srv.(ProviderServer).ExtractResourceMetadata(ctx, req.(*ExtractResourceMetadataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -342,8 +342,8 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Provider_Configure_Handler,
 		},
 		{
-			MethodName: "GenerateDependencies",
-			Handler:    _Provider_GenerateDependencies_Handler,
+			MethodName: "ExtractResourceMetadata",
+			Handler:    _Provider_ExtractResourceMetadata_Handler,
 		},
 		{
 			MethodName: "RetrieveData",
