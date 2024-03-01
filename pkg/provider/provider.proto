@@ -41,11 +41,31 @@ message Features {
   bool console = 2;
 }
 
+message QuotaRequirements {
+  // VM-Based requirements
+
+  // The CPU requirements in cores
+  uint64 cpu = 1;
+  // The RAM requirements in MiB (1024 * 1024 bytes)
+  uint64 ram = 2;
+  // The disk requirements in MiB (1024 * 1024 bytes)
+  uint64 disk = 3;
+
+  // Network-Based requirements
+
+  // The router requirements in count
+  uint64 router = 4;
+  // The amount of networks in count
+  uint64 network = 5;
+}
+
 message Metadata {
   // Keys of all resources this resource depends on
   repeated string depends_on_keys = 1;
   // Features supported with this resource
   Features features = 2;
+  // The quota requirements which will be used by this resource
+  QuotaRequirements quota_requirements = 3;
 }
 
 message ExtractResourceMetadataRequest { repeated Resource resources = 1; }
