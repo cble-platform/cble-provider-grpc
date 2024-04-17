@@ -3,6 +3,7 @@ package cble
 import (
 	"context"
 	"fmt"
+	"net"
 
 	common "github.com/cble-platform/cble-provider-grpc/pkg/common"
 	"github.com/sirupsen/logrus"
@@ -14,13 +15,13 @@ import (
 type CBLEClientOptions struct {
 	TLS    bool
 	CAFile string
-	Port   int
+	Socket string
 }
 
 var defaultClientOptions = &CBLEClientOptions{
 	TLS:    false,
 	CAFile: "",
-	Port:   50051,
+	Socket: "/tmp/cble-server",
 }
 
 func DefaultConnect() (*grpc.ClientConn, error) {
@@ -29,7 +30,11 @@ func DefaultConnect() (*grpc.ClientConn, error) {
 
 // Connect returns a CBLEServer gRPC connection to the CBLE gRPC server for use with the gRPC client
 func Connect(options *CBLEClientOptions) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
+	var opts = []grpc.DialOption{
+		grpc.WithContextDialer(func(ctx context.Context, addr string) (net.Conn, error) {
+			return net.Dial("unix", addr)
+		}),
+	}
 	if options.TLS {
 		if options.CAFile == "" {
 			return nil, fmt.Errorf("CA file must be provided for TLS")
@@ -43,7 +48,7 @@ func Connect(options *CBLEClientOptions) (*grpc.ClientConn, error) {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", options.Port), opts...)
+	conn, err := grpc.Dial(options.Socket, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("fail to dial: %v", err)
 	}

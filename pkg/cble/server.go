@@ -21,14 +21,14 @@ type CBLEServerOptions struct {
 	TLS      bool
 	CertFile string
 	KeyFile  string
-	Port     int
+	Socket   string
 }
 
 var defaultServerOptions = &CBLEServerOptions{
 	TLS:      false,
 	CertFile: "",
 	KeyFile:  "",
-	Port:     50051,
+	Socket:   "/tmp/cble-server",
 }
 
 func DefaultServe(ctx context.Context, server CBLEServer) error {
@@ -37,7 +37,7 @@ func DefaultServe(ctx context.Context, server CBLEServer) error {
 
 // Serve is a blocking call which returns an error if unable to serve
 func Serve(ctx context.Context, server CBLEServer, options *CBLEServerOptions) error {
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", options.Port))
+	lis, err := net.Listen("unix", options.Socket)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
