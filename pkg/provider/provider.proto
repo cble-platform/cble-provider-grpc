@@ -1,98 +1,157 @@
 // Setup gRPC protobuf meta
 syntax = "proto3";
 option go_package = "github.com/cble-platform/cble-provider-grpc/pkg/provider";
-import "google/protobuf/struct.proto";
 import "common.proto";
 
 // gRPC Service
 service Provider {
   rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
-  rpc Configure(ConfigureRequest) returns (RPCStatusReply) {}
-  rpc Deploy(DeployRequest) returns (DeployReply) {}
-  rpc Destroy(DestroyRequest) returns (DestroyReply) {}
+  rpc Configure(ConfigureRequest) returns (ConfigureReply) {}
+  rpc ExtractResourceMetadata(ExtractResourceMetadataRequest)
+      returns (ExtractResourceMetadataReply) {}
+  rpc RetrieveData(RetrieveDataRequest) returns (RetrieveDataReply) {}
+  rpc DeployResource(DeployResourceRequest) returns (DeployResourceReply) {}
+  rpc DestroyResource(DestroyResourceRequest) returns (DestroyResourceReply) {}
   rpc GetConsole(GetConsoleRequest) returns (GetConsoleReply) {}
-  rpc GetResourceList(GetResourceListRequest) returns (GetResourceListReply) {}
+  rpc ResourcePower(ResourcePowerRequest) returns (ResourcePowerReply) {}
 }
+
+// Models
+message Deployment {
+  string id = 1;
+  map<string, string> templateVars = 2;
+}
+
+message Resource {
+  string id = 1;
+  string key = 2;
+  bytes object = 3;
+}
+
+message DependencyVars { map<string, string> vars = 1; }
 
 // Configure
 message ConfigureRequest { bytes config = 1; }
 
-// Deploy
-message DeployRequest {
-  string deployment_id = 1;
-  bytes blueprint = 2;
-  google.protobuf.Struct templateVars = 3;
-  google.protobuf.Struct deployment_state = 4;
-  google.protobuf.Struct deployment_vars = 5;
+message ConfigureReply { bool success = 1; }
+
+// ExtractResourceMetadata
+message Features {
+  bool power = 1;
+  bool console = 2;
 }
 
-message DeployReply {
-  RPCStatus status = 1;
-  repeated string errors = 2;
-  string deployment_id = 3;
-  google.protobuf.Struct deployment_state = 4;
-  google.protobuf.Struct deployment_vars = 5;
+message QuotaRequirements {
+  // VM-Based requirements
+
+  // The CPU requirements in cores
+  uint64 cpu = 1;
+  // The RAM requirements in MiB (1024 * 1024 bytes)
+  uint64 ram = 2;
+  // The disk requirements in MiB (1024 * 1024 bytes)
+  uint64 disk = 3;
+
+  // Network-Based requirements
+
+  // The router requirements in count
+  uint64 router = 4;
+  // The amount of networks in count
+  uint64 network = 5;
+}
+
+message Metadata {
+  // Keys of all resources this resource depends on
+  repeated string depends_on_keys = 1;
+  // Features supported with this resource
+  Features features = 2;
+  // The quota requirements which will be used by this resource
+  QuotaRequirements quota_requirements = 3;
+}
+
+message ExtractResourceMetadataRequest { repeated Resource resources = 1; }
+
+message ExtractResourceMetadataReply {
+  bool success = 1;
+  optional string error = 2;
+  // Map of metadata mapping resource keys to metadata objects
+  map<string, Metadata> metadata = 3;
+}
+
+// RetrieveData
+message RetrieveDataRequest {
+  // From the *ent.Deployment
+  Deployment deployment = 1;
+  // From the *ent.Resource
+  Resource resource = 2;
+  // From the *ent.DeploymentNode
+  map<string, string> vars = 3;
+  // Map of maps from all dependency nodes
+  map<string, DependencyVars> dependencyVars = 4;
+}
+
+message RetrieveDataReply {
+  bool success = 1;
+  optional string error = 2;
+  map<string, string> updatedVars = 3; // To update the *ent.DeploymentNode
+}
+
+// Deploy
+message DeployResourceRequest {
+  // From the *ent.Deployment
+  Deployment deployment = 1;
+  // From the *ent.Resource
+  Resource resource = 2;
+  // From the *ent.DeploymentNode
+  map<string, string> vars = 3;
+  // Map of maps from all dependency nodes
+  map<string, DependencyVars> dependencyVars = 4;
+}
+
+message DeployResourceReply {
+  bool success = 1;
+  optional string error = 2;
+  map<string, string> updatedVars = 3; // To update the *ent.DeploymentNode
 }
 
 // Destroy
-message DestroyRequest {
-  string deployment_id = 1;
-  bytes blueprint = 2;
-  google.protobuf.Struct templateVars = 3;
-  google.protobuf.Struct deployment_state = 4;
-  google.protobuf.Struct deployment_vars = 5;
+message DestroyResourceRequest {
+  Deployment deployment = 1;    // From the *ent.Deployment
+  Resource resource = 2;        // From the *ent.Resource
+  map<string, string> vars = 3; // From the *ent.DeploymentNode
 }
 
-message DestroyReply {
-  RPCStatus status = 1;
-  repeated string errors = 2;
-  string deployment_id = 3;
-  google.protobuf.Struct deployment_state = 4;
-  google.protobuf.Struct deployment_vars = 5;
+message DestroyResourceReply {
+  bool success = 1;
+  optional string error = 2;
+  map<string, string> updatedVars = 3; // To update the *ent.DeploymentNode
 }
 
 // GetConsole
 message GetConsoleRequest {
-  string deployment_id = 1;
-  string host_key = 2;
-  google.protobuf.Struct deployment_state = 3;
-  google.protobuf.Struct deployment_vars = 4;
+  Resource resource = 1;        // From the *ent.Resource
+  map<string, string> vars = 2; // From the *ent.DeploymentNode
 }
 
 message GetConsoleReply {
-  RPCStatus status = 1;
-  repeated string errors = 2;
+  bool success = 1;
+  optional string error = 2;
   string console = 3;
-  string deployment_id = 4;
 }
 
-// GetResourceList
-
-enum ResourceType {
-  UNKNOWN = 0;
-  HOST = 1;
-  NETWORK = 2;
-  ROUTER = 3;
+enum PowerState {
+  ON = 0;
+  OFF = 1;
+  RESET = 2;
 }
 
-message GetResourceListRequest {
-  string deployment_id = 1;
-  bytes blueprint = 2;
-  google.protobuf.Struct templateVars = 3;
-  google.protobuf.Struct deployment_state = 4;
-  google.protobuf.Struct deployment_vars = 5;
+// ResourcePower
+message ResourcePowerRequest {
+  Resource resource = 1;        // From the *ent.Resource
+  map<string, string> vars = 2; // From the *ent.DeploymentNode
+  PowerState state = 3;         // The intended power state
 }
 
-message Resource {
-  string key = 1;
-  string deployment_id = 2;
-  string name = 3;
-  ResourceType type = 4;
-}
-
-message GetResourceListReply {
-  RPCStatus status = 1;
-  repeated string errors = 2;
-  string deployment_id = 3;
-  repeated Resource resources = 4;
+message ResourcePowerReply {
+  bool success = 1;
+  optional string error = 2;
 }

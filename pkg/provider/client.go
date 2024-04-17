@@ -61,6 +61,6 @@ func NewClient(ctx context.Context, conn grpc.ClientConnInterface) (ProviderClie
 	if err != nil {
 		return client, fmt.Errorf("handshake failed: %v", err)
 	}
-	logrus.Debugf("Connected to Provider Server (v%s)", reply.ServerVersion)
+	logrus.WithField("component", "PROVIDER_GRPC_CLIENT").Debugf("Connected to Provider Server (v%s)", reply.ServerVersion)
 	return client, nil
 }

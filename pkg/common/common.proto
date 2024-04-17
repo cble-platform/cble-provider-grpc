@@ -1,13 +1,6 @@
 syntax = "proto3";
 option go_package = "github.com/cble-platform/cble-provider-grpc/pkg/common";
 
-enum RPCStatus {
-  SUCCESS = 0;
-  FAILURE = 1;
-}
-
-message RPCStatusReply { RPCStatus status = 1; }
-
 // Handshake (DO NOT MODIFY)
 message HandshakeRequest { string client_version = 1; }
 message HandshakeReply { string server_version = 1; }
