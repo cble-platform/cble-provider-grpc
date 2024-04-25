@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	sync "sync"
 
 	"github.com/cble-platform/cble-provider-grpc/pkg/common"
@@ -60,7 +61,13 @@ func Serve(ctx context.Context, server CBLEServer, options *CBLEServerOptions) e
 	wg.Add(1)
 	go func() {
 		<-ctx.Done()
+		// Stop the gRPC server
 		grpcServer.GracefulStop()
+		// Cleanup the socket file
+		err := os.Remove(options.Socket)
+		if err != nil {
+			logrus.Warnf("failed to cleanup socket %s: %v", options.Socket, err)
+		}
 		wg.Done()
 	}()
 
